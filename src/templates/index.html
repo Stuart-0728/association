@@ -13,36 +13,36 @@
         <!-- 导航栏 -->
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
             <div class="container">
-                <a class="navbar-brand" href="/">
+                <router-link class="navbar-brand" to="/">
                     <img src="/static/img/logo.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top me-2">
                     重庆师范大学师能素质协会
-                </a>
+                </router-link>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="/">首页</a>
+                            <router-link class="nav-link" to="/">首页</router-link>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/activities">活动列表</a>
+                            <router-link class="nav-link" to="/activities">活动列表</router-link>
                         </li>
                         <li class="nav-item" v-if="isLoggedIn && isAdmin">
-                            <a class="nav-link" href="/admin/dashboard">管理仪表盘</a>
+                            <router-link class="nav-link" to="/admin/dashboard">管理仪表盘</router-link>
                         </li>
                     </ul>
                     <div class="d-flex" v-if="!isLoggedIn">
-                        <a href="/login" class="btn btn-outline-light me-2">登录</a>
-                        <a href="/register" class="btn btn-light">注册</a>
+                        <router-link to="/login" class="btn btn-outline-light me-2">登录</router-link>
+                        <router-link to="/register" class="btn btn-light">注册</router-link>
                     </div>
                     <div class="dropdown" v-else>
                         <button class="btn btn-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown">
                             {{ currentUser.username }}
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/profile">个人信息</a></li>
-                            <li><a class="dropdown-item" href="/my-registrations">我的报名</a></li>
+                            <li><router-link class="dropdown-item" to="/profile">个人信息</router-link></li>
+                            <li><router-link class="dropdown-item" to="/my-registrations">我的报名</router-link></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="#" @click="logout">退出登录</a></li>
                         </ul>
