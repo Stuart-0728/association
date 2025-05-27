@@ -38,7 +38,7 @@
                     </div>
                     <div class="dropdown" v-else>
                         <button class="btn btn-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown">
-                            {{ currentUser.username }}
+                            {{ currentUser.username | default('') }}
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="/profile">个人信息</a></li>
