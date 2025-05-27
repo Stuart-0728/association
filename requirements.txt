@@ -89,3 +89,9 @@ xhtml2pdf==0.2.17
 zopfli==0.2.3.post1
 flask
 gunicorn
+Flask
+Flask-SQLAlchemy
+PyMySQL
+Werkzeug
+gunicorn
+python-dotenv
