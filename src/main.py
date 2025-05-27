@@ -1,59 +1,54 @@
-from flask import Flask, session, g, render_template, jsonify
+from flask import Flask, session, render_template, jsonify
 from flask_sqlalchemy import SQLAlchemy
-import os
-import sys
+import os, sys
 
 # 添加项目路径
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+sys.path.insert(0, os.path.dirname(__file__))
 
-# 创建Flask应用
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'cqnu_association_secret_key')
 
-# 配置数据库为SQLite（免费部署用）
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
+# 数据库配置
+DB_USER = os.getenv('DB_USER', 'root')
+DB_PASS = os.getenv('DB_PASS', '')
+DB_HOST = os.getenv('DB_HOST', 'localhost')
+DB_PORT = os.getenv('DB_PORT', '3306')
+DB_NAME = os.getenv('DB_NAME', 'mydb')
+app.config['SQLALCHEMY_DATABASE_URI'] = (
+    f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}?charset=utf8mb4"
+)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['PERMANENT_SESSION_LIFETIME'] = 86400
+app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_COOKIE_HTTPONLY'] = True
 
-# 生产环境配置
-app.config['PERMANENT_SESSION_LIFETIME'] = 86400  # 会话有效期为1天
-app.config['SESSION_COOKIE_SECURE'] = True  # 仅通过HTTPS发送cookie
-app.config['SESSION_COOKIE_HTTPONLY'] = True  # 防止JavaScript访问cookie
-app.config['PREFERRED_URL_SCHEME'] = 'https'  # 优先使用HTTPS
+db = SQLAlchemy(app)
 
-# 初始化数据库
-from src.models import init_db
-init_db(app)
+# 蓝图注册
+from routes.user import user_bp
+from routes.auth import auth_bp
+from routes.activity import activity_bp
+from routes.registration import registration_bp
+from routes.dashboard import dashboard_bp
+from routes.upload import upload_bp
 
-# 注册蓝图
-from src.routes.auth import auth_bp
-from src.routes.activity import activity_bp
-from src.routes.registration import registration_bp
-from src.routes.dashboard import dashboard_bp
-from src.routes.upload import upload_bp
-
-app.register_blueprint(auth_bp, url_prefix='/api/auth')
-app.register_blueprint(activity_bp, url_prefix='/api/activities')
-app.register_blueprint(registration_bp, url_prefix='/api/registrations')
+app.register_blueprint(user_bp, url_prefix='/api')
+app.register_blueprint(auth_bp, url_prefix='/api')
+app.register_blueprint(activity_bp, url_prefix='/api')
+app.register_blueprint(registration_bp, url_prefix='/api')
 app.register_blueprint(dashboard_bp, url_prefix='/api')
 app.register_blueprint(upload_bp, url_prefix='/api')
 
-# 前端路由处理
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def catch_all(path):
-    # 始终传递 currentUser=None，防止模板变量未定义导致 500
-    return render_template('index.html', currentUser=None)
-
-# 错误处理
-@app.errorhandler(404)
-def not_found(e):
-    return render_template('index.html', currentUser=None)
+@app.route('/')
+def index():
+    from models import Activity
+    activities = Activity.query.order_by(Activity.start_time.desc()).limit(10).all()
+    return render_template('index.html', activities=activities)
 
 @app.errorhandler(500)
 def server_error(e):
     return jsonify({'success': False, 'message': '服务器内部错误'}), 500
 
-# 安全头部
 @app.after_request
 def add_security_headers(response):
     response.headers['X-Content-Type-Options'] = 'nosniff'
@@ -62,5 +57,4 @@ def add_security_headers(response):
     return response
 
 if __name__ == '__main__':
-    # 生产环境使用
     app.run(host='0.0.0.0', port=5000, debug=False)
