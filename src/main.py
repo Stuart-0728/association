@@ -41,12 +41,13 @@ app.register_blueprint(upload_bp, url_prefix='/api')
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def catch_all(path):
-    return render_template('index.html')
+    # 始终传递 currentUser=None，防止模板变量未定义导致 500
+    return render_template('index.html', currentUser=None)
 
 # 错误处理
 @app.errorhandler(404)
 def not_found(e):
-    return render_template('index.html')
+    return render_template('index.html', currentUser=None)
 
 @app.errorhandler(500)
 def server_error(e):
