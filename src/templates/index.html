@@ -1,16 +1,10 @@
 {% extends 'base.html' %}
 {% block title %}系统首页{% endblock %}
 {% block content %}
-  <h1>欢迎来到 校园协会管理系统</h1>
-  {% if activities %}
-    <ul>
-      {% for act in activities %}
-      <li>
-        <a href="#">{{ act.title }}</a> - {{ act.start_time.strftime('%Y-%m-%d') }}
-      </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>当前暂无活动，敬请期待！</p>
-  {% endif %}
+<h1>活动列表</h1>
+<ul>
+  {% for act in activities %}
+    <li>{{ act.title }} - {{ act.start_time.strftime('%Y-%m-%d') }}</li>
+  {% endfor %}
+</ul>
 {% endblock %}
