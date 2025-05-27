@@ -54,7 +54,7 @@
           <li v-if="!isLoggedIn" class="nav-item"><a class="nav-link" href="/register">注册</a></li>
           <li v-if="isLoggedIn" class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-              <i class="bi bi-person-circle"></i> {{ currentUser ? currentUser.username : '用户' }}
+              <i class="bi bi-person-circle"></i> {{ currentUser.username if currentUser else '用户' }}
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
               <li v-if="isAdmin"><a class="dropdown-item" href="/admin/activities/new">新建活动</a></li>
