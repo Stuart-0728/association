@@ -67,7 +67,7 @@ const app = Vue.createApp({
 // 定义组件
 
 // 首页组件
-const Home = {
+const 主页 = {
     template: `
         <div class="container">
             <div class="jumbotron bg-light p-5 rounded">
@@ -473,7 +473,7 @@ const Register = {
 
 // 定义路由
 const routes = [
-    { path: '/', component: Home },
+    { path: '/', component: 主页 },
     { path: '/activities', component: ActivityList },
     { path: '/login', component: Login },
     { path: '/register', component: Register }
@@ -489,3 +489,6 @@ app.use(router);
 
 // 挂载应用
 app.mount('#app');
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('页面加载完成');
+});
