@@ -4,3 +4,4 @@ PyMySQL
 Werkzeug
 gunicorn
 python-dotenv
+Flask-Migrate
