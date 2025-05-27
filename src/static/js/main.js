@@ -1,4 +1,4 @@
-// 主脚本文件
+// 主脚本文件（生产环境建议使用 .prod.js 版本的 Vue 和 Vue Router）
 
 // 创建Vue应用
 const app = Vue.createApp({
@@ -58,16 +58,16 @@ const app = Vue.createApp({
             this.toastClass = type;
             
             const toastEl = this.$refs.toast;
-            const toast = new bootstrap.Toast(toastEl);
-            toast.show();
+            if (toastEl) {
+                const toast = new bootstrap.Toast(toastEl);
+                toast.show();
+            }
         }
     }
 });
 
-// 定义组件
-
 // 首页组件
-const Home = {
+const 主页 = {
     template: `
         <div class="container">
             <div class="jumbotron bg-light p-5 rounded">
@@ -120,6 +120,7 @@ const Home = {
             }
         },
         truncateText(text, length) {
+            if (!text) return '';
             if (text.length <= length) return text;
             return text.substring(0, length) + '...';
         },
@@ -255,6 +256,7 @@ const ActivityList = {
             );
         },
         truncateText(text, length) {
+            if (!text) return '';
             if (text.length <= length) return text;
             return text.substring(0, length) + '...';
         },
@@ -473,10 +475,11 @@ const Register = {
 
 // 定义路由
 const routes = [
-    { path: '/', component: Home },
+    { path: '/', component: 主页 },
     { path: '/activities', component: ActivityList },
     { path: '/login', component: Login },
     { path: '/register', component: Register }
+    // 后续可继续添加新页面路由
 ];
 
 const router = VueRouter.createRouter({
