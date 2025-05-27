@@ -65,7 +65,7 @@ const app = Vue.createApp({
 });
 
 // 首页组件
-const Home = {
+const 主页 = {
   template: `
     <div class="container">
       <div class="jumbotron bg-light p-5 rounded mt-4">
