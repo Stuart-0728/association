@@ -1,51 +1,65 @@
-from flask import Flask, render_template, session, jsonify, request, redirect, url_for
+from flask import Flask, session, g, render_template, jsonify
+from flask_sqlalchemy import SQLAlchemy
+import os
+import sys
 
+# 添加项目路径
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+
+# 创建Flask应用
 app = Flask(__name__)
-app.secret_key = 'replace_with_a_secret_key'
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'cqnu_association_secret_key')
 
-# 示例用户数据
-users = {
-    'admin': {'username': 'admin', 'role': 'admin'},
-    'user': {'username': 'user', 'role': 'user'}
-}
+# 配置数据库为SQLite（免费部署用）
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# 所有页面路由都渲染同一个模板，让前端 Vue Router 接管
-@app.route('/')
-@app.route('/activities')
-@app.route('/login', methods=['GET', 'POST'])
-@app.route('/register', methods=['GET', 'POST'])
-@app.route('/admin/activities/new')
-@app.route('/activities/<path:dummy>')
-def catch_all(dummy=None):
-    currentUser = session.get('user')
-    return render_template('index.html', currentUser=currentUser)
+# 生产环境配置
+app.config['PERMANENT_SESSION_LIFETIME'] = 86400  # 会话有效期为1天
+app.config['SESSION_COOKIE_SECURE'] = False  # 开发环境中允许HTTP发送cookie
+app.config['SESSION_COOKIE_HTTPONLY'] = True  # 防止JavaScript访问cookie
+app.config['PREFERRED_URL_SCHEME'] = 'http'  # 开发环境使用HTTP
 
-# 用户信息接口
-@app.route('/api/auth/profile')
-def api_profile():
-    user = session.get('user')
-    if user:
-        return jsonify({'success': True, 'user': user})
-    else:
-        return jsonify({'success': False, 'message': '未登录'}), 401
+# 初始化数据库
+from src.models import init_db
+init_db(app)
 
-# 登录接口
-@app.route('/api/auth/login', methods=['POST'])
-def api_login():
-    data = request.json
-    username = data.get('username')
-    user = users.get(username)
-    if user:
-        session['user'] = user
-        return jsonify({'success': True, 'user': user})
-    else:
-        return jsonify({'success': False, 'message': '用户名不存在'}), 400
+# 注册蓝图
+from src.routes.auth import auth_bp
+from src.routes.activity import activity_bp
+from src.routes.registration import registration_bp
+from src.routes.dashboard import dashboard_bp
+from src.routes.upload import upload_bp
 
-# 登出接口
-@app.route('/api/auth/logout', methods=['POST'])
-def api_logout():
-    session.pop('user', None)
-    return jsonify({'success': True})
+app.register_blueprint(auth_bp, url_prefix='/api/auth')
+app.register_blueprint(activity_bp, url_prefix='/api/activities')
+app.register_blueprint(registration_bp, url_prefix='/api/registrations')
+app.register_blueprint(dashboard_bp, url_prefix='/api')
+app.register_blueprint(upload_bp, url_prefix='/api')
+
+# 前端路由处理
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def catch_all(path):
+    return render_template('index.html')
+
+# 错误处理
+@app.errorhandler(404)
+def not_found(e):
+    return render_template('index.html')
+
+@app.errorhandler(500)
+def server_error(e):
+    return jsonify({'success': False, 'message': '服务器内部错误'}), 500
+
+# 安全头部
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    return response
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # 生产环境使用
+    app.run(host='0.0.0.0', port=5000, debug=False)
